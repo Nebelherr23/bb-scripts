@@ -1,7 +1,7 @@
 import { context } from 'esbuild';
 import { BitburnerPlugin } from 'esbuild-bitburner-plugin';
-import chokidar from chokidar;
-import fs from fs/promises;
+import chokidar from 'chokidar';
+import fs from 'fs/promises';
 
 /** @type import('esbuild-bitburner-plugin').PluginExtension*/
 const oneWaySync = {
@@ -48,13 +48,13 @@ const createContext = async () => await context({
     'scripts/**/*.ts',
     'scripts/**/*.tsx',
   ],
-  outbase: "./servers",
+  outbase: "./scripts",
   outdir: "./build",
   plugins: [
     BitburnerPlugin({
       port: 12525,
       types: 'NetscriptDefinitions.d.ts',
-      plugins: [oneWaySync],
+      extensions: [oneWaySync],
       mirror: {
       },
       distribute: {
