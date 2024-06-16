@@ -55,7 +55,7 @@ export class Logger {
 
 }
 export function getLoggerPort(ns:NS):NetscriptPort {
-    return ns.getPortHandle(Number(ns.read('/tmp/log-master.pid')));
+    return ns.getPortHandle(Number(ns.read('/tmp/log-master.txt')));
 }
 
 export abstract class BaseLogRecord {

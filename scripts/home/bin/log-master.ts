@@ -4,7 +4,7 @@ export async function main(ns:NS) {
     ns.tail();
     ns.disableLog('ALL');
     const port = ns.getPortHandle(ns.pid);
-    ns.write('/tmp/log-master.pid',String(ns.pid),"w");
+    ns.write('/tmp/log-master.txt',String(ns.pid),"w");
     port.clear();
     let running = true;
     function cleanup() {
