@@ -30,14 +30,14 @@ export class Logger {
     /** 
      * Emits the LogRecord to the main logging script
      */
-    log(level: LogLevel, record: BaseLogRecord) {
-        if (this.min_level <= level) {
+    log(level: string,event:string="",msg:string="",extra:any={}) {
+        if (this.min_level <= LogLevel[level]) {
             const out = {
-                mod: this.mod,          /* Module appearing in the rendered log message */
-                level: LogLevel[level],           /* Level with which we're emitting the message */
-                event: record.event,    /* Event the record has been emitted for */
-                msg: record.msg,        /* Additional message to emit */
-                extra: record.extra     /* Extra data the record ships */
+                mod: this.mod,           /* Module appearing in the rendered log message */
+                level: LogLevel[level],  /* Level with which we're emitting the message */
+                event: event,            /* Event the record has been emitted for */
+                msg: msg,                /* Additional message to emit */
+                extra: extra             /* Extra data the record ships */
             }
             this.rawRecord = JSON.stringify(out);
             this.port.write(this.rawRecord);
@@ -47,14 +47,14 @@ export class Logger {
     /**
      * Convenience methods for emitting records with a specific log level
      */
-    debug(record:BaseLogRecord) { this.log(LogLevel.DEBUG,record); }
-    info(record:BaseLogRecord) { this.log(LogLevel.INFO,record); }
-    warning(record:BaseLogRecord){ this.log(LogLevel.WARNING,record); }
-    error(record:BaseLogRecord) { this.log(LogLevel.ERROR,record); }
-    critical(record:BaseLogRecord) { this.log(LogLevel.CRITICAL,record); }
-
+    debug(event:string="",msg:string="",extra:any={}) { this.log('DEBUG',event,msg,extra); }
+    info(event:string="",msg:string="",extra:any={}) { this.log('INFO',event,msg,extra); }
+    warning(event:string,msg:string,extra:any){ this.log('WARNING',event,msg,extra); }
+    error(event:string,msg:string,extra:any) { this.log('ERROR',event,msg,extra); }
+    critical(event:string,msg:string,extra:any) { this.log('CRITICAL',event,msg,extra); }
 }
 export function getLoggerPort(ns:NS):NetscriptPort {
+    ns.printf(`Logger PID: ${Number(ns.read('/tmp/log-master.txt'))}`);
     return ns.getPortHandle(Number(ns.read('/tmp/log-master.txt')));
 }
 
@@ -64,10 +64,10 @@ export abstract class BaseLogRecord {
     extra: any
     level:LogLevel
 
-    constructor(level: LogLevel, event: string, extra: any) {
+    constructor(level: LogLevel, event: string, extra: any = {}) {
         this.event = event;
         this.extra = extra;
-        this.msg = "Undefined msg"
+        this.msg = ""
         this.level = level
     }
 }
@@ -81,21 +81,42 @@ export class LogRecord extends BaseLogRecord {
 }
 
 export function getLogger(ns:NS,mod:string,level:LogLevel):Logger {
-    let port:NetscriptPort = ns.getPortHandle(Number(ns.read('/tmp/log-master.pid')));
+    let port:NetscriptPort = ns.getPortHandle(Number(ns.read('/tmp/log-master.txt')));
     return new Logger(mod,level,port);
 }
 
 export function coloredLogLevel(level:LogLevel|string):string {
     switch (level) {
         case LogLevel.DEBUG:
+        case LogLevel['DEBUG']:
+        case "DEBUG":
+        case "debug":
             return `${Fonts.BLUE}DBG${Fonts.RESET}`;
         case LogLevel.INFO:
+        case LogLevel['INFO']:
+        case "INFO":
+        case "info":
             return `${Fonts.GREEN}INF${Fonts.RESET}`;
         case LogLevel.WARNING:
+        case LogLevel['WARNING']:
+        case "WARNING":
+        case "warning":
+        case "WARN":
+        case "warn":
             return `${Fonts.YELLOW}WRN${Fonts.RESET}`;
         case LogLevel.ERROR:
+        case LogLevel['ERROR']:
+        case "ERROR":
+        case "error":
+        case "ERR":
+        case "err":
             return `${Fonts.RED}ERR${Fonts.RESET}`;
         case LogLevel.CRITICAL:
+        case LogLevel['CRITICAL']:
+        case "CRITICAL":
+        case "critical":
+        case "CRT":
+        case "crt":
             return `${Fonts.PURPLE}CRT${Fonts.RESET}`;
     }
 }
